@@ -29,13 +29,13 @@ class FingerPrintHelper( private val context: Context) : FingerprintManager.Auth
 
     override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence?) {
         super.onAuthenticationHelp(helpCode, helpString)
-        Toast.makeText(context,"Authentication Success",Toast.LENGTH_SHORT).show()
+        Toast.makeText(context,"Authentication Help",Toast.LENGTH_SHORT).show()
         // start new activity hear
     }
 
     override fun onAuthenticationSucceeded(result: FingerprintManager.AuthenticationResult?) {
         super.onAuthenticationSucceeded(result)
-        Toast.makeText(context,"Authentication Help",Toast.LENGTH_SHORT).show()
+        Toast.makeText(context,"Authentication Success",Toast.LENGTH_SHORT).show()
     }
 
     override fun onAuthenticationFailed() {

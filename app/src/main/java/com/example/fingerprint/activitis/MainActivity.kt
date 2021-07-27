@@ -1,4 +1,4 @@
-package com.example.fingerprint
+package com.example.fingerprint.activitis
 
 import android.app.KeyguardManager
 import android.content.Context
@@ -13,6 +13,12 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.fingerprint.FingerPrintHelper
+import com.example.fingerprint.R
 import com.example.fingerprint.databinding.ActivityMainBinding
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -30,13 +36,32 @@ class MainActivity : AppCompatActivity() {
     lateinit var cipher         : Cipher
     lateinit var cryptoObject   : FingerprintManager.CryptoObject
 
+    lateinit var navHostFragment        : NavHostFragment
+    lateinit var navController          : NavController
+    lateinit var appBarConfiguration    : AppBarConfiguration
+
     var KEY_NAME = "my_key"
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        // operation work of fragment.
+        navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
+        // work of action bar.
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.splashFragment,R.id.fingerPrintFragment))
+        setupActionBarWithNavController(navController,appBarConfiguration)
+
+        // work of show and hide action bar.
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id){
+                R.id.splashFragment -> supportActionBar!!.hide()
+
+                else -> supportActionBar!!.show()
+            }
+        }
         km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         fm = getSystemService(Context.FINGERPRINT_SERVICE) as FingerprintManager
 
@@ -77,10 +102,10 @@ class MainActivity : AppCompatActivity() {
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setUserAuthenticationRequired(true)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7).build())
+            keyGenerator.generateKey()
         }catch (e:Exception){
 
         }
-
         // Initialization of Cryptography
         if(initCipher()){
            cipher.let {
@@ -103,7 +128,6 @@ class MainActivity : AppCompatActivity() {
         }catch (e:Exception){
 
         }
-
         try {
             keyStore.load(null)
             val key = keyStore.getKey(KEY_NAME,null) as SecretKey
